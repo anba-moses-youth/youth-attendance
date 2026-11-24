@@ -23,6 +23,7 @@ header svg{width:30px;height:30px;fill:#111}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px 4px}
 .tile{border:0;background:none;display:flex;flex-direction:column;align-items:center;padding:8px 2px 10px;font:inherit;color:#14202e}
 .tile img{width:min(40vw,200px);height:min(40vw,200px);object-fit:contain}
+.emo{width:min(40vw,200px);height:min(40vw,200px);display:flex;align-items:center;justify-content:center;font-size:90px;background:#f2c230;border-radius:50%;transform:scale(.8)}
 .tile span{font-family:"Amiri","Noto Naskh Arabic","Droid Arabic Naskh",serif;font-size:26px;font-weight:700;margin-top:2px}
 .tile b{font-size:15px;color:#6a7788;font-weight:400}
 main{flex:1;overflow-y:auto;padding:12px 12px 24px}
@@ -71,6 +72,7 @@ h3{margin:4px 0 10px;font-size:21px}
 <main id="main"></main>
 <nav id="nav"></nav>
 </div>
+<script src="hymns.js"></script>
 <script>
 const KEY='youth-att.v1';
 let S;
@@ -100,22 +102,22 @@ function lastSeen(id){const ds=sessionDates().reverse();for(const d of ds)if(S.s
 
 const HOME='<svg viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h5v-6h4v6h5v-8h3z"/></svg>';
 const BACK='<svg viewBox="0 0 24 24"><path d="M9 4l8 8-8 8-2-2 6-6-6-6z"/></svg>';
-const TITLES={att:'الحضور',mem:'القائمة',fu:'الافتقاد',bd:'أعياد الميلاد',st:'الإحصائيات',adm:'النسخ الاحتياطي والإدارة'};
+const TITLES={hy:'ترانيم وتماجيد',mb:'للمخدومين',att:'الحضور',mem:'القائمة',fu:'الافتقاد',bd:'أعياد الميلاد',st:'الإحصائيات',adm:'النسخ الاحتياطي والإدارة'};
 function render(){
   const hd=$('#hd');
   if(tab==='home'){hd.innerHTML='<span class="ib"></span><div class="t">'+esc(S.title)+'</div><button class="ib" onclick="go(\'home\')">'+HOME+'</button>';}
   else{hd.innerHTML='<span class="ib"></span><div class="t">'+TITLES[tab]+'</div><button class="ib" onclick="go(\'home\')">'+HOME+'</button>';}
   $('#nav').innerHTML='';
-  ({home:vHome,att:vAtt,mem:vMem,fu:vFu,bd:vBd,st:vSt,adm:vAdm})[tab]();
+  ({home:vHome,hy:vHy,mb:vMb,att:vAtt,mem:vMem,fu:vFu,bd:vBd,st:vSt,adm:vAdm})[tab]();
 }
 function go(t){tab=t;q='';render();$('#main').scrollTop=0}
 let bi=0;
 function photos(){let a=[];try{a=JSON.parse(localStorage.getItem('youth-att.photos')||'[]')}catch(e){}return ['banner.jpg','group.jpg','church.jpg'].concat(a)}
 function newM(){go('mem');editM()}
 function vHome(){
-  const T=[['att','الحضور',1],['mem','القائمة',2],['new','مخدوم جديد',3],['fu','الافتقاد',4],['bd','أعياد الميلاد',5],['st','الإحصائيات',6],['adm','نسخة احتياطية',7]];
+  const T=[['att','الحضور',1],['mem','القائمة',2],['new','مخدوم جديد',3],['fu','الافتقاد',4],['bd','أعياد الميلاد',5],['st','الإحصائيات',6],['hy','ترانيم وتماجيد',0],['mb','للمخدومين',0],['adm','نسخة احتياطية',7]];
   let ph=photos();bi=bi%ph.length;
-  $('#main').innerHTML='<img class="ban" id="ban" onclick="bi++;vHome()" src="'+ph[bi]+'" alt=""><div class="tiles">'+T.map(t=>`<button class="tile" onclick="${t[0]==='new'?'newM()':`go('${t[0]}')`}"><img src="tile${t[2]}.webp" alt=""><span>${t[1]}</span></button>`).join('')+'</div>'+(S.members.length?'':'<div class="sub" style="text-align:center;padding:10px">ابدأ بإضافة الشباب من «مخدوم جديد»</div>');
+  $('#main').innerHTML='<img class="ban" id="ban" onclick="bi++;vHome()" src="'+ph[bi]+'" alt=""><div class="tiles">'+T.map(t=>`<button class="tile" onclick="${t[0]==='new'?'newM()':`go('${t[0]}')`}">${t[2]?`<img src="tile${t[2]}.webp" alt="">`:`<div class="emo">${t[0]==='hy'?'🎶':'📲'}</div>`}<span>${t[1]}</span></button>`).join('')+'</div>'+(S.members.length?'':'<div class="sub" style="text-align:center;padding:10px">ابدأ بإضافة الشباب من «مخدوم جديد»</div>');
 }
 
 function vAtt(){
@@ -167,6 +169,7 @@ function editM(id){
   <label>النقاط</label><input id="f_pts" type="number" inputmode="numeric" value="${m.points||0}">
   <label>ملاحظات</label><textarea id="f_notes">${esc(m.notes)}</textarea>
   <button class="btn block" onclick="saveM('${id||''}')">حفظ</button>
+  ${id?`<button class="btn sec block" onclick="sendCard('${id}')">📲 إرسال كارت المخدوم (حضوره ونقطه)</button>`:''}
   ${id?`<button class="btn red block" onclick="delM('${id}')">حذف</button>`:''}
   <button class="btn sec block" onclick="closeSheet()">إلغاء</button>`);
 }
@@ -199,6 +202,27 @@ function vSt(){
   const st=S.members.map(m=>{let p=0,t=0;ds.forEach(d=>{const v=S.sessions[d][m.id];if(v){t++;if(v==='p')p++}});return{m,p,t,pc:t?Math.round(p*100/t):0}}).filter(x=>x.t).sort((a,b)=>b.pc-a.pc);
   $('#main').innerHTML=`<div class="sub" style="margin-bottom:8px">عدد الاجتماعات المسجلة: ${num(ds.length)}</div>`+(st.map(x=>`<div class="card row"><div class="grow name">${esc(x.m.name)}</div><b>${num(x.pc)}٪</b><span class="sub">(${num(x.p)}/${num(x.t)})</span></div>`).join('')||'<div class="empty">لسه مفيش اجتماعات مسجلة</div>');
 }
+
+function myH(){let a=[];try{a=JSON.parse(localStorage.getItem('youth-att.hymns')||'[]')}catch(e){}return a}
+function vHy(){
+  const all=window.HYMNS.concat(myH());
+  const sec=(k,t)=>`<h3 style="margin-top:14px">${t}</h3>`+(all.filter(x=>x.cat===k).map(x=>`<div class="card"><div class="name">${esc(x.title)}</div>${x.text?`<div style="white-space:pre-line;line-height:1.9;margin-top:8px">${esc(x.text)}</div>`:''}${x.url?`<div class="sub" style="margin-top:6px"><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.src||'رابط')}</a></div>`:''}${x.mine?`<button class="btn sec" style="margin-top:8px;padding:8px 14px" onclick="delH('${x.id}')">حذف</button>`:''}</div>`).join('')||'<div class="empty">لسه مفيش</div>');
+  $('#main').innerHTML=sec('hymn','🎶 ترانيم')+sec('praise','✨ تماجيد وذكصولوجيات')+'<button class="btn block" onclick="addH()">+ إضافة ترنيمة أو تمجيد</button><div class="sub" style="padding:8px;text-align:center">اللي بتضيفه بيتحفظ على موبايلك بس. عشان يظهر للمخدومين ابعته للمطور يتنشر.</div>';
+}
+function addH(){sheet(`<h3>إضافة</h3><label>النوع</label><select id="h_k"><option value="hymn">ترنيمة</option><option value="praise">تمجيد</option></select><label>العنوان</label><input id="h_t"><label>الكلمات (اختياري)</label><textarea id="h_x" style="min-height:160px"></textarea><label>رابط صوت أو فيديو (اختياري)</label><input id="h_u" type="url"><button class="btn block" onclick="saveH()">حفظ</button><button class="btn sec block" onclick="closeSheet()">إلغاء</button>`)}
+function saveH(){const t=$('#h_t').value.trim();if(!t){toast('اكتب العنوان');return}const a=myH();a.push({id:uid(),mine:1,cat:$('#h_k').value,title:t,text:$('#h_x').value.trim(),url:$('#h_u').value.trim(),src:'رابط'});localStorage.setItem('youth-att.hymns',JSON.stringify(a));closeSheet();vHy()}
+function delH(id){localStorage.setItem('youth-att.hymns',JSON.stringify(myH().filter(x=>x.id!==id)));vHy()}
+function memberLink(){return location.origin+location.pathname.replace(/[^\/]*$/,'')+'member.html'}
+function vMb(){
+  $('#main').innerHTML=`<div class="card"><div class="name">لينك المخدومين</div><div class="sub" style="margin:6px 0">فيه الترانيم والتماجيد وكارت كل واحد (حضوره ونقطه). مفيهوش بيانات أي حد تاني ولا أي حاجة من أدوات الخدمة.</div><div class="sub" style="direction:ltr;text-align:left;word-break:break-all">${esc(memberLink())}</div><button class="btn block" onclick="shareMl()">إرسال اللينك للمخدومين</button></div>
+  <div class="card"><div class="name">كروت المخدومين</div><div class="sub" style="margin:6px 0">اختار مخدوم وابعتله كارته على واتساب. الكارت فيه اسمه وحضوره ونقطه هو بس.</div>${sorted().map(m=>`<div class="row" style="padding:6px 0;border-top:1px solid #eee"><div class="grow name">${esc(m.name)}</div><button class="btn sec" style="padding:8px 14px" onclick="sendCard('${m.id}')">إرسال</button></div>`).join('')||'<div class="sub">مفيش مخدومين</div>'}</div>`;
+}
+async function shareMl(){const t='تطبيق شباب الأنبا موسى (ترانيم وتماجيد): '+memberLink();if(navigator.share){try{await navigator.share({text:t});return}catch(e){if(e.name==='AbortError')return}}window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank')}
+function cardLink(m){const ds=sessionDates();let a=0,t=0,ab=0;ds.forEach(d=>{const v=S.sessions[d][m.id];if(v){t++;if(v==='p')a++;if(v==='a')ab++}});
+  const o={n:m.name,p:t?Math.round(a*100/t):0,a:a,t:t,ab:ab,pts:m.points||0,ls:lastSeen(m.id)||'',d:today};
+  return memberLink()+'#c='+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o)))))}
+function sendCard(id){const m=S.members.find(x=>x.id===id);if(!m)return;const t='كارتك في شباب الأنبا موسى (حضورك ونقطك):\n'+cardLink(m);const p=intl(best(m));
+  window.open('https://wa.me/'+p+'?text='+encodeURIComponent(t),'_blank')}
 function vAdm(){
   $('#main').innerHTML=`<div class="card">
   <button class="btn block" onclick="bulk()">إضافة مخدومين بالجملة</button>

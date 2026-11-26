@@ -34,7 +34,7 @@ a{color:#1f3a5f}
 <div class="tabs"><button id="t_h" onclick="show('h')">ترانيم</button><button id="t_p" onclick="show('p')">تماجيد</button><button id="t_c" onclick="show('c')">كارتي</button></div>
 <div class="c" id="c"></div>
 </div>
-<script src="hymns.js"></script>
+<script src="hymns.js"></script><script src="hymns2.js"></script><script src="pp1.js"></script><script src="pp2.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -48,8 +48,8 @@ if(location.hash.startsWith('#c=')){
   localStorage.setItem(CK,JSON.stringify(card));history.replaceState(null,'',location.pathname)}catch(e){}
 }
 let T=card?'c':'h';
-function items(k){let a=window.HYMNS.filter(x=>x.cat===k);return a}
-function list(k){const a=items(k);return a.length?a.map(x=>`<div class="card"><h3>${esc(x.title)}</h3><div class="tx">${esc(x.text)}</div><div class="sub" style="margin-top:8px">المصدر: <a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.src)}</a></div></div>`).join(''):'<div class="card sub" style="text-align:center">هتتضاف ترانيم قريب</div>'}
+function items(k){let a=window.HYMNS.filter(x=>k==='hymn'?(x.cat==='hymn'||x.cat==='pp'):x.cat===k);return a}
+function list(k){const a=items(k);return a.length?a.map(x=>`<div class="card"><h3>${esc(x.title)}</h3><div class="tx" style="white-space:pre-wrap">${esc(x.text)}</div>${x.url?`<div class="sub" style="margin-top:8px">المصدر: <a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.src)}</a></div>`:''}</div>`).join(''):'<div class="card sub" style="text-align:center">هتتضاف ترانيم قريب</div>'}
 function show(t){T=t;['h','p','c'].forEach(k=>$('#t_'+k).className=k===t?'on':'');
   if(t==='h')$('#c').innerHTML=list('hymn');
   else if(t==='p')$('#c').innerHTML=list('praise');

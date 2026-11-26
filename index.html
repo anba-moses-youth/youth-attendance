@@ -52,6 +52,7 @@ label{display:block;font-size:15px;color:#6a7788;margin:10px 0 4px}
 .stats{display:flex;gap:8px;margin-bottom:10px}
 .stats div{flex:1;background:#fff;border-radius:12px;padding:10px 4px;text-align:center;font-size:14px;color:#6a7788;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .stats b{display:block;font-size:26px;color:#14202e}
+.gbar{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;white-space:nowrap}.gchip{flex:0 0 auto;border:2px solid #d9c9a0;background:#fff;border-radius:20px;padding:6px 12px;font:600 14px inherit;color:#333}.gchip.on{background:#f4c430;border-color:#b8860b}.ghd{margin:12px 2px 6px;font-weight:800;color:#6b4e16}
 .badge{display:inline-block;background:#fde8e5;color:#c0392b;border-radius:20px;padding:2px 10px;font-size:14px;font-weight:700}
 .badge.g{background:#e0f3e8;color:#1e8e4e}
 .circ{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;text-decoration:none;border:0;background:#e3e9f2}
@@ -79,6 +80,7 @@ h3{margin:4px 0 10px;font-size:21px}
 <script>
 const KEY='youth-att.v1';
 let S;
+try{const bk=KEY+'.bak-pre-groups';if(!localStorage.getItem(bk)&&localStorage.getItem(KEY))localStorage.setItem(bk,localStorage.getItem(KEY))}catch(e){}
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.members)S={members:[],sessions:{},follow:{},title:'اجتماع الأنبا موسى للشباب - كنيسة العذراء'};
 if(S.title==='اجتماع الشباب')S.title='اجتماع الأنبا موسى للشباب - كنيسة العذراء';
@@ -98,6 +100,27 @@ function toast(t){const e=document.createElement('div');e.className='toast';e.te
 function intl(p){p=String(p||'').replace(/[^\d+]/g,'');if(!p)return'';if(p.startsWith('+'))return p.slice(1);if(p.startsWith('00'))return p.slice(2);if(p.startsWith('0'))return'2'+p;return p}
 function best(m){return m.phone||m.parent||''}
 function contactBtns(m){const p=best(m);if(!p)return'<span class="sub">لا يوجد رقم</span>';return `<a class="circ" href="tel:${esc(p)}">📞</a><a class="circ wa" href="https://wa.me/${intl(p)}" target="_blank" rel="noopener">💬</a>`}
+
+const GROUPS=[['s1','ثانوي عام 1'],['s2','ثانوي عام 2'],['s3','ثانوي عام 3'],['t1','ثانوي فني 1'],['t2','ثانوي فني 2'],['t3','ثانوي فني 3'],['c1','كليات 1'],['c2','كليات 2'],['c3','كليات 3'],['c4','كليات 4'],['gc','خريجين كليات'],['gt','خريجين فني']];
+const GN={};GROUPS.forEach(g=>GN[g[0]]=g[1]);const GL={};GROUPS.forEach(g=>GL[g[1]]=g[0]);
+let GF='';
+function gOf(m){return GN[m.g]?m.g:''}
+function inG(m){return GF===''||(GF==='none'?gOf(m)==='':gOf(m)===GF)}
+function msorted(){return sorted().filter(inG)}
+function gCount(id){return S.members.filter(m=>id===''?true:id==='none'?gOf(m)==='':gOf(m)===id).length}
+function anyG(){return S.members.some(m=>gOf(m))}
+function gBar(fn){const c=(id,l)=>`<button class="gchip${GF===id?' on':''}" onclick="GF='${id}';${fn}">${l} (${num(gCount(id))})</button>`;
+  return '<div class="gbar">'+c('','الكل')+GROUPS.map(g=>c(g[0],g[1])).join('')+(gCount('none')?c('none','بدون مجموعة'):'')+'</div>'}
+function gGroup(list,row){if(GF!==''||!anyG())return list.map(row);const out=[];GROUPS.map(g=>g[0]).concat(['']).forEach(id=>{const l=list.filter(m=>gOf(m)===id);if(!l.length)return;out.push(`<div class="ghd">${id?GN[id]:'بدون مجموعة'} · ${num(l.length)}</div>`);l.forEach(m=>out.push(row(m)))});return out}
+function gSummary(){if(GF!==''||!anyG())return'';const ds=sessionDates();let h='<div class="card"><div class="name" style="margin-bottom:6px">ملخص المجموعات</div>';
+  GROUPS.map(g=>g[0]).concat(['']).forEach(id=>{const ms=S.members.filter(m=>gOf(m)===id);if(!ms.length)return;let p=0,t=0;ms.forEach(m=>ds.forEach(d=>{const v=S.sessions[d][m.id];if(v){t++;if(v==='p')p++}}));h+=`<div class="row" style="padding:4px 0"><div class="grow">${id?GN[id]:'بدون مجموعة'}</div><span class="sub">${num(ms.length)} مخدوم</span><b style="margin-inline-start:10px">${t?num(Math.round(p*100/t))+'٪':'-'}</b></div>`});return h+'</div>'}
+function gBreak(){if(GF!==''||!anyG())return'';const ss=S.sessions[date]||{};let o='';GROUPS.map(g=>g[0]).concat(['']).forEach(id=>{const ms=S.members.filter(m=>gOf(m)===id);if(!ms.length)return;const p=ms.filter(m=>ss[m.id]==='p').length;o+=`\n${id?GN[id]:'بدون مجموعة'}: حاضر ${num(p)} من ${num(ms.length)}`});return '\n\nحسب المجموعة:'+o}
+function gSel(id,v){return `<select id="${id}"><option value="">بدون مجموعة</option>${GROUPS.map(g=>`<option value="${g[0]}"${g[0]===v?' selected':''}>${g[1]}</option>`).join('')}</select>`}
+function setG(id,v){const m=S.members.find(x=>x.id===id);if(m){if(v)m.g=v;else delete m.g;save()}}
+function vAsg(){const list=msorted().filter(m=>m.name.includes(q));
+  $('#main').innerHTML=gBar('vAsg()')+`<div class="sub" style="margin-bottom:8px">اختار مجموعة كل مخدوم. بيتحفظ فورًا ومفيش أي بيانات تانية بتتغير.</div><input placeholder="🔍 بحث بالاسم" value="${esc(q)}" oninput="q=this.value;vAsgList()" style="margin-bottom:10px"><div id="asl"></div>`;vAsgList()}
+function vAsgList(){const list=msorted().filter(m=>m.name.includes(q));$('#asl').innerHTML=list.map(m=>`<div class="card"><div class="name">${esc(m.name)}</div><select onchange="setG('${m.id}',this.value)"><option value="">بدون مجموعة</option>${GROUPS.map(g=>`<option value="${g[0]}"${g[0]===gOf(m)?' selected':''}>${g[1]}</option>`).join('')}</select></div>`).join('')||'<div class="empty">لا نتائج</div>'}
+function restoreBak(){const b=localStorage.getItem(KEY+'.bak-pre-groups');if(!b){toast('مفيش نسخة');return}sheet(`<h3>الرجوع لنسخة ما قبل المجموعات؟</h3><div class="sub">هترجع البيانات زي ما كانت قبل إضافة المجموعات، وهتتمسح أي توزيعات عملتها.</div><button class="btn red block" onclick="localStorage.setItem(KEY,localStorage.getItem(KEY+'.bak-pre-groups'));location.reload()">أيوه ارجع</button><button class="btn sec block" onclick="closeSheet()">لا</button>`)}
 function sorted(){return S.members.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar'))}
 function sessionDates(){return Object.keys(S.sessions).filter(d=>Object.keys(S.sessions[d]).length).sort()}
 function missStreak(id){const ds=sessionDates().reverse();let n=0;for(const d of ds){const v=S.sessions[d][id];if(v==='a')n++;else if(v==='p')break;else if(v==='e')continue;else break}return n}
@@ -105,13 +128,13 @@ function lastSeen(id){const ds=sessionDates().reverse();for(const d of ds)if(S.s
 
 const HOME='<svg viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h5v-6h4v6h5v-8h3z"/></svg>';
 const BACK='<svg viewBox="0 0 24 24"><path d="M9 4l8 8-8 8-2-2 6-6-6-6z"/></svg>';
-const TITLES={hy:'ترانيم وتماجيد',mb:'للمخدومين',att:'الحضور',mem:'القائمة',fu:'الافتقاد',bd:'أعياد الميلاد',st:'الإحصائيات',adm:'النسخ الاحتياطي والإدارة'};
+const TITLES={hy:'ترانيم وتماجيد',mb:'للمخدومين',att:'الحضور',mem:'القائمة',fu:'الافتقاد',bd:'أعياد الميلاد',st:'الإحصائيات',adm:'النسخ الاحتياطي والإدارة',asg:'توزيع المجموعات'};
 function render(){
   const hd=$('#hd');
   if(tab==='home'){hd.innerHTML='<span class="ib"></span><div class="t">'+esc(S.title)+'</div><button class="ib" onclick="go(\'home\')">'+HOME+'</button>';}
   else{hd.innerHTML='<span class="ib"></span><div class="t">'+TITLES[tab]+'</div><button class="ib" onclick="go(\'home\')">'+HOME+'</button>';}
   $('#nav').innerHTML='';
-  ({home:vHome,hy:vHy,mb:vMb,att:vAtt,mem:vMem,fu:vFu,bd:vBd,st:vSt,adm:vAdm})[tab]();
+  ({home:vHome,hy:vHy,mb:vMb,att:vAtt,mem:vMem,fu:vFu,bd:vBd,st:vSt,adm:vAdm,asg:vAsg})[tab]();
 }
 function go(t){tab=t;q='';render();$('#main').scrollTop=0}
 let bi=0;
@@ -125,38 +148,37 @@ function vHome(){
 
 function vAtt(){
   const ss=S.sessions[date]||{};
-  const list=sorted().filter(m=>m.name.includes(q));
-  let p=0,a=0,e=0;S.members.forEach(m=>{const v=ss[m.id];if(v==='p')p++;else if(v==='a')a++;else if(v==='e')e++});
-  const un=S.members.length-p-a-e;
+  const list=msorted().filter(m=>m.name.includes(q));
+  let p=0,a=0,e=0;S.members.filter(inG).forEach(m=>{const v=ss[m.id];if(v==='p')p++;else if(v==='a')a++;else if(v==='e')e++});
+  const un=S.members.filter(inG).length-p-a-e;
   let h=`<div class="card"><label style="margin-top:0">تاريخ الاجتماع</label><input type="date" value="${date}" onchange="date=this.value||today;render()"><div class="sub" style="margin-top:6px">${fmt(date)}</div></div>`;
   if(!S.members.length)return $('#main').innerHTML=h+`<div class="empty">لسه مفيش مخدومين.<br>روح تبويب «المخدومين» وضيف الأسماء.<br><button class="btn" style="margin-top:14px" onclick="newM()">إضافة مخدومين</button></div>`;
   h+=`<div class="stats"><div><b style="color:#1e8e4e">${num(p)}</b>حاضر</div><div><b style="color:#c0392b">${num(a)}</b>غائب</div><div><b style="color:#d99a1c">${num(e)}</b>معتذر</div><div><b>${num(un)}</b>لم يُسجل</div></div>`;
-  h+=`<input placeholder="🔍 بحث بالاسم" value="${esc(q)}" oninput="q=this.value;vAttList()" style="margin-bottom:10px">`;
+  h+=gBar('vAtt()');h+=`<input placeholder="🔍 بحث بالاسم" value="${esc(q)}" oninput="q=this.value;vAttList()" style="margin-bottom:10px">`;
   h+=`<div class="row" style="margin-bottom:10px"><button class="btn green grow" onclick="allP()">الكل حاضر</button><button class="btn sec grow" onclick="shareSum()">إرسال الملخص</button></div><div id="alist"></div>`;
   $('#main').innerHTML=h;vAttList();
 }
 function vAttList(){
   const ss=S.sessions[date]||{};
-  const list=sorted().filter(m=>m.name.includes(q));
-  $('#alist').innerHTML=list.map(m=>{const v=ss[m.id];return `<div class="card"><div class="name">${esc(m.name)}</div><div class="seg"><button class="${v==='p'?'p':''}" onclick="mark('${m.id}','p')">حاضر</button><button class="${v==='a'?'a':''}" onclick="mark('${m.id}','a')">غائب</button><button class="${v==='e'?'e':''}" onclick="mark('${m.id}','e')">معتذر</button></div></div>`}).join('')||'<div class="empty">لا نتائج</div>';
+  const list=msorted().filter(m=>m.name.includes(q));
+  $('#alist').innerHTML=gGroup(list,m=>{const v=ss[m.id];return `<div class="card"><div class="name">${esc(m.name)}</div><div class="seg"><button class="${v==='p'?'p':''}" onclick="mark('${m.id}','p')">حاضر</button><button class="${v==='a'?'a':''}" onclick="mark('${m.id}','a')">غائب</button><button class="${v==='e'?'e':''}" onclick="mark('${m.id}','e')">معتذر</button></div></div>`}).join('')||'<div class="empty">لا نتائج</div>';
 }
 function mark(id,v){const ss=S.sessions[date]=S.sessions[date]||{};if(ss[id]===v)delete ss[id];else ss[id]=v;save();
   const y=$('#main').scrollTop;vAtt();$('#main').scrollTop=y}
-function allP(){const ss=S.sessions[date]=S.sessions[date]||{};S.members.forEach(m=>{if(!ss[m.id])ss[m.id]='p'});save();vAtt();toast('تم تسجيل الباقي حاضر')}
-function sumText(){const ss=S.sessions[date]||{};const g=v=>sorted().filter(m=>ss[m.id]===v).map(m=>m.name);
+function allP(){const ss=S.sessions[date]=S.sessions[date]||{};S.members.filter(inG).forEach(m=>{if(!ss[m.id])ss[m.id]='p'});save();vAtt();toast('تم تسجيل الباقي حاضر')}
+function sumText(){const ss=S.sessions[date]||{};const g=v=>msorted().filter(m=>ss[m.id]===v).map(m=>m.name);
   const P=g('p'),A=g('a'),E=g('e');
-  return `${S.title} - ${fmt(date)}\nحاضر: ${num(P.length)}\nغائب: ${num(A.length)}\nمعتذر: ${num(E.length)}\n\nالغائبين:\n${A.map(n=>'- '+n).join('\n')||'-'}\n\nالمعتذرين:\n${E.map(n=>'- '+n).join('\n')||'-'}`}
+  return `${S.title}${GF&&GF!=='none'?' ('+GN[GF]+')':''} - ${fmt(date)}\nحاضر: ${num(P.length)}\nغائب: ${num(A.length)}\nمعتذر: ${num(E.length)}${gBreak()}\n\nالغائبين:\n${A.map(n=>'- '+n).join('\n')||'-'}\n\nالمعتذرين:\n${E.map(n=>'- '+n).join('\n')||'-'}`}
 async function shareSum(){const t=sumText();if(navigator.share){try{await navigator.share({text:t});return}catch(e){if(e.name==='AbortError')return}}
   try{await navigator.clipboard.writeText(t);toast('تم النسخ')}catch(e){prompt('انسخ الملخص',t)}}
 
 function vMem(){
-  const list=sorted().filter(m=>m.name.includes(q));
-  let h=`<input placeholder="🔍 بحث بالاسم" value="${esc(q)}" oninput="q=this.value;vMemList()" style="margin-bottom:10px"><div id="mlist"></div><button class="fab" onclick="editM()">+</button>`;
+  let h=gBar('vMem()')+`<input placeholder="🔍 بحث بالاسم" value="${esc(q)}" oninput="q=this.value;vMemList()" style="margin-bottom:10px"><button class="btn sec block" style="margin-bottom:10px" onclick="go('asg')">🗂 توزيع المخدومين على المجموعات</button><div id="mlist"></div><button class="fab" onclick="editM()">+</button>`;
   $('#main').innerHTML=h;vMemList();
 }
 function vMemList(){
-  const list=sorted().filter(m=>m.name.includes(q));
-  $('#mlist').innerHTML=list.map(m=>`<div class="card row" onclick="editM('${m.id}')"><div class="grow"><div class="name">${esc(m.name)}</div><div class="sub">${esc(best(m))||'بدون رقم'}${m.birthday?' · 🎂 '+num(m.birthday.split('-').reverse().join('/')):''}${m.points?' · ⭐ '+num(m.points):''}${m.father?' · '+esc(m.father):''}</div></div><span style="font-size:22px;color:#9aa6b5">‹</span></div>`).join('')||`<div class="empty">${S.members.length?'لا نتائج':'اضغط + لإضافة مخدوم<br>أو «إضافة بالجملة» من تبويب المزيد'}</div>`;
+  const list=msorted().filter(m=>m.name.includes(q));
+  $('#mlist').innerHTML=gGroup(list,m=>`<div class="card row" onclick="editM('${m.id}')"><div class="grow"><div class="name">${esc(m.name)}</div><div class="sub">${gOf(m)?'<b>'+GN[gOf(m)]+'</b> · ':''}${esc(best(m))||'بدون رقم'}${m.birthday?' · 🎂 '+num(m.birthday.split('-').reverse().join('/')):''}${m.points?' · ⭐ '+num(m.points):''}${m.father?' · '+esc(m.father):''}</div></div><span style="font-size:22px;color:#9aa6b5">‹</span></div>`).join('')||`<div class="empty">${S.members.length?'لا نتائج':'اضغط + لإضافة مخدوم<br>أو «إضافة بالجملة» من تبويب المزيد'}</div>`;
 }
 function sheet(html){closeSheet();const d=document.createElement('div');d.className='sheet';d.id='sheet';d.innerHTML='<div>'+html+'</div>';d.addEventListener('click',e=>{if(e.target===d)closeSheet()});document.body.appendChild(d)}
 function closeSheet(){const s=$('#sheet');if(s)s.remove()}
@@ -164,6 +186,7 @@ function editM(id){
   const m=S.members.find(x=>x.id===id)||{name:'',phone:'',parent:'',birthday:'',notes:'',father:'',addr:'',points:0};
   sheet(`<h3>${id?'بيانات المخدوم':'مخدوم جديد'}</h3>
   <label>الاسم</label><input id="f_name" value="${esc(m.name)}">
+  <label>السنة / المجموعة</label>${gSel('f_g',gOf(m))}
   <label>رقم التليفون</label><input id="f_phone" type="tel" value="${esc(m.phone)}">
   <label>رقم ولي الأمر</label><input id="f_parent" type="tel" value="${esc(m.parent)}">
   <label>تاريخ الميلاد</label><input id="f_bd" type="date" value="${esc(m.birthday)}">
@@ -177,19 +200,19 @@ function editM(id){
   <button class="btn sec block" onclick="closeSheet()">إلغاء</button>`);
 }
 function saveM(id){const name=$('#f_name').value.trim();if(!name){toast('اكتب الاسم');return}
-  const o={name,phone:$('#f_phone').value.trim(),parent:$('#f_parent').value.trim(),birthday:$('#f_bd').value,notes:$('#f_notes').value.trim(),father:$('#f_father').value.trim(),addr:$('#f_addr').value.trim(),points:parseInt($('#f_pts').value)||0};
-  if(id)Object.assign(S.members.find(x=>x.id===id),o);else S.members.push(Object.assign({id:uid()},o));
+  const o={name,phone:$('#f_phone').value.trim(),parent:$('#f_parent').value.trim(),birthday:$('#f_bd').value,notes:$('#f_notes').value.trim(),father:$('#f_father').value.trim(),addr:$('#f_addr').value.trim(),points:parseInt($('#f_pts').value)||0};const gv=$('#f_g').value;
+  if(id){const mm=S.members.find(x=>x.id===id);Object.assign(mm,o);if(gv)mm.g=gv;else delete mm.g}else{const nm=Object.assign({id:uid()},o);if(gv)nm.g=gv;S.members.push(nm)}
   save();closeSheet();render()}
 function delM(id){const m=S.members.find(x=>x.id===id);sheet(`<h3>حذف ${esc(m.name)}؟</h3><div class="sub">هيتمسح من القائمة وسجل الحضور بتاعه.</div><button class="btn red block" onclick="delM2('${id}')">أيوه احذف</button><button class="btn sec block" onclick="closeSheet()">لا</button>`)}
 function delM2(id){S.members=S.members.filter(x=>x.id!==id);Object.values(S.sessions).forEach(s=>delete s[id]);delete S.follow[id];save();closeSheet();render()}
 
 function vFu(){
-  const rows=S.members.map(m=>({m,n:missStreak(m.id),last:lastSeen(m.id),f:(S.follow[m.id]||[]).slice(-1)[0]})).filter(r=>r.n>0).sort((a,b)=>b.n-a.n);
+  const rows=S.members.filter(inG).map(m=>({m,n:missStreak(m.id),last:lastSeen(m.id),f:(S.follow[m.id]||[]).slice(-1)[0]})).filter(r=>r.n>0).sort((a,b)=>b.n-a.n);
   let h='';
   if(!sessionDates().length)h='<div class="empty">سجل الحضور الأول وبعدها هتظهر هنا قائمة الغايبين للافتقاد.</div>';
   else if(!rows.length)h='<div class="empty">🎉 مفيش غايبين للافتقاد</div>';
   else h=`<div class="sub" style="margin-bottom:8px">الغايبين في آخر اجتماعات (${num(rows.length)})</div>`+rows.map(r=>`<div class="card"><div class="row"><div class="grow"><div class="name">${esc(r.m.name)}</div><div class="sub"><span class="badge">غاب ${num(r.n)} ${r.n>2?'مرات':r.n==2?'مرتين':'مرة'} ورا بعض</span></div><div class="sub" style="margin-top:4px">${r.last?'آخر حضور: '+fmt(r.last):'لم يحضر من قبل'}</div>${r.f?`<div class="sub">آخر افتقاد: ${fmt(r.f.d)} ${r.f.t?'· '+esc(r.f.t):''}</div>`:''}</div>${contactBtns(r.m)}</div><button class="btn sec block" onclick="fuM('${r.m.id}')">تسجيل افتقاد</button></div>`).join('');
-  $('#main').innerHTML=h;
+  $('#main').innerHTML=gBar('vFu()')+h;
 }
 function fuM(id){const m=S.members.find(x=>x.id===id);const hist=(S.follow[id]||[]).slice().reverse();
   sheet(`<h3>افتقاد ${esc(m.name)}</h3><label>ملاحظة (اختياري)</label><textarea id="f_t" placeholder="اتكلمت معاه، ظروفه، ..."></textarea><button class="btn green block" onclick="saveFu('${id}')">تم الافتقاد</button>${hist.length?'<h3 style="margin-top:18px">السجل</h3>'+hist.map(x=>`<div class="card"><div class="sub">${fmt(x.d)}</div>${esc(x.t)||'—'}</div>`).join(''):''}<button class="btn sec block" onclick="closeSheet()">إغلاق</button>`)}
@@ -202,8 +225,8 @@ function vBd(){
 }
 function vSt(){
   const ds=sessionDates();
-  const st=S.members.map(m=>{let p=0,t=0;ds.forEach(d=>{const v=S.sessions[d][m.id];if(v){t++;if(v==='p')p++}});return{m,p,t,pc:t?Math.round(p*100/t):0}}).filter(x=>x.t).sort((a,b)=>b.pc-a.pc);
-  $('#main').innerHTML=`<div class="sub" style="margin-bottom:8px">عدد الاجتماعات المسجلة: ${num(ds.length)}</div>`+(st.map(x=>`<div class="card row"><div class="grow name">${esc(x.m.name)}</div><b>${num(x.pc)}٪</b><span class="sub">(${num(x.p)}/${num(x.t)})</span></div>`).join('')||'<div class="empty">لسه مفيش اجتماعات مسجلة</div>');
+  const st=S.members.filter(inG).map(m=>{let p=0,t=0;ds.forEach(d=>{const v=S.sessions[d][m.id];if(v){t++;if(v==='p')p++}});return{m,p,t,pc:t?Math.round(p*100/t):0}}).filter(x=>x.t).sort((a,b)=>b.pc-a.pc);
+  $('#main').innerHTML=gBar('vSt()')+gSummary()+`<div class="sub" style="margin-bottom:8px">عدد الاجتماعات المسجلة: ${num(ds.length)}</div>`+(st.map(x=>`<div class="card row"><div class="grow name">${esc(x.m.name)}</div><b>${num(x.pc)}٪</b><span class="sub">(${num(x.p)}/${num(x.t)})</span></div>`).join('')||'<div class="empty">لسه مفيش اجتماعات مسجلة</div>');
 }
 
 function myH(){let a=[];try{a=JSON.parse(localStorage.getItem('youth-att.hymns')||'[]')}catch(e){}return a}
@@ -248,6 +271,8 @@ function vAdm(){
   $('#main').innerHTML=`<div class="card">
   <button class="btn block" onclick="bulk()">إضافة مخدومين بالجملة</button>
   <button class="btn block" onclick="impM()">📥 استيراد مخدومين من ملف (خدمتي Pro)</button>
+  <button class="btn block" onclick="go('asg')">🗂 توزيع المخدومين على المجموعات</button>
+  <button class="btn sec block" onclick="restoreBak()">↩ الرجوع لنسخة ما قبل المجموعات</button>
   <button class="btn sec block" onclick="exportD()">نسخة احتياطية (حفظ/إرسال)</button>
   <button class="btn sec block" onclick="importD()">استرجاع نسخة احتياطية</button>
   <button class="btn sec block" onclick="pickBn()">إضافة صورة للواجهة (بتتحفظ على موبايلك بس)</button>
@@ -260,17 +285,17 @@ function impM(){sheet(`<h3>استيراد مخدومين من ملف</h3><div cl
 function impFile(){const f=$('#f_imp').files[0];if(!f){toast('اختار الملف الأول');return}const r=new FileReader();r.onload=()=>impText(r.result);r.readAsText(f)}
 function impText(t){let a;try{const d=JSON.parse(t);a=Array.isArray(d)?d:d.import;if(!a&&d.members){S=d;save();closeSheet();render();toast('تم استرجاع النسخة');return}}catch(e){toast('الملف غير صالح');return}
   if(!Array.isArray(a)){toast('الملف غير صالح');return}
-  let n=0,sk=0;a.forEach(o=>{if(!o.name)return;const key=String(o.name).trim();if(S.members.some(m=>m.name.trim()===key)){sk++;return}S.members.push({id:uid(),name:key,phone:o.phone||'',parent:o.parent||'',birthday:o.birthday||'',notes:o.notes||'',father:o.father||'',addr:o.addr||'',points:o.points||0});n++});
+  let n=0,sk=0;a.forEach(o=>{if(!o.name)return;const key=String(o.name).trim();if(S.members.some(m=>m.name.trim()===key)){sk++;return}S.members.push({id:uid(),name:key,phone:o.phone||'',parent:o.parent||'',birthday:o.birthday||'',notes:o.notes||'',father:o.father||'',addr:o.addr||'',points:o.points||0,...(GN[o.g]?{g:o.g}:(GL[o.group]?{g:GL[o.group]}:{}))});n++});
   save();closeSheet();render();toast('تم استيراد '+num(n)+' مخدوم'+(sk?' (تخطيت '+num(sk)+' موجودين)':''))}
 function pickBn(){$('#bnf').click()}
 function bnGo(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const W=700,k=Math.min(1,W/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);try{const a=JSON.parse(localStorage.getItem('youth-att.photos')||'[]');a.push(c.toDataURL('image/jpeg',0.65));localStorage.setItem('youth-att.photos',JSON.stringify(a));toast('تمت إضافة الصورة ('+num(a.length)+')')}catch(e){toast('المساحة امتلت، امسح صور')}};im.src=r.result};r.readAsDataURL(f);inp.value=''}
 function delBn(){localStorage.removeItem('youth-att.photos');toast('تم مسح صورك')}
 function rename(){sheet(`<h3>اسم الاجتماع</h3><input id="f_t" value="${esc(S.title)}"><button class="btn block" onclick="S.title=$('#f_t').value.trim()||S.title;save();closeSheet();render()">حفظ</button>`)}
-function bulk(){sheet(`<h3>إضافة بالجملة</h3><div class="sub">اكتب كل مخدوم في سطر. تقدر تكتب: الاسم، التليفون، تليفون ولي الأمر، تاريخ الميلاد (2008-05-17)</div><textarea id="f_b" style="min-height:200px" placeholder="مينا جرجس، 01012345678"></textarea><button class="btn block" onclick="bulk2()">إضافة</button><button class="btn sec block" onclick="closeSheet()">إلغاء</button>`)}
+function bulk(){sheet(`<h3>إضافة بالجملة</h3><div class="sub">اكتب كل مخدوم في سطر. تقدر تكتب: الاسم، التليفون، تليفون ولي الأمر، تاريخ الميلاد (2008-05-17)، المجموعة (مثلا: ثانوي عام 2)</div><textarea id="f_b" style="min-height:200px" placeholder="مينا جرجس، 01012345678"></textarea><button class="btn block" onclick="bulk2()">إضافة</button><button class="btn sec block" onclick="closeSheet()">إلغاء</button>`)}
 function bulk2(){let n=0;$('#f_b').value.split('\n').forEach(l=>{const p=l.split(/[,،\t]/).map(x=>x.trim());if(!p[0])return;
   const dig=s=>String(s||'').replace(/[٠-٩]/g,d=>AR.indexOf(d));
   const bd=(dig(p[3]).match(/^\d{4}-\d{1,2}-\d{1,2}$/)||[''])[0].replace(/-(\d)(?=-|$)/g,'-0$1');
-  S.members.push({id:uid(),name:p[0],phone:dig(p[1]),parent:dig(p[2]),birthday:bd,notes:''});n++});
+  const gg=GL[(p[4]||'').trim()];S.members.push(Object.assign({id:uid(),name:p[0],phone:dig(p[1]),parent:dig(p[2]),birthday:bd,notes:''},gg?{g:gg}:{}));n++});
   save();closeSheet();toast('تمت إضافة '+num(n));render()}
 function backupText(){return JSON.stringify(S)}
 async function exportD(){const t=backupText();

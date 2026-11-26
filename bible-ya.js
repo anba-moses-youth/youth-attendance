@@ -1,0 +1,33 @@
+(function(){
+var BASE='../church-app/',IDX=[["متى", "bbnt1", 28], ["مرقس", "bbnt2", 16], ["لوقا", "bbnt3", 24], ["يوحنا", "bbnt4", 21], ["أعمال الرسل", "bbnt5", 28], ["رومية", "bbnt6", 16], ["كورنثوس الأولى", "bbnt6", 16], ["كورنثوس الثانية", "bbnt6", 13], ["غلاطية", "bbnt6", 6], ["أفسس", "bbnt6", 6], ["فيلبي", "bbnt7", 4], ["كولوسي", "bbnt7", 4], ["تسالونيكي الأولى", "bbnt7", 5], ["تسالونيكي الثانية", "bbnt7", 3], ["تيموثاوس الأولى", "bbnt7", 6], ["تيموثاوس الثانية", "bbnt7", 4], ["تيطس", "bbnt7", 3], ["فليمون", "bbnt7", 1], ["العبرانيين", "bbnt7", 13], ["يعقوب", "bbnt7", 5], ["بطرس الأولى", "bbnt7", 5], ["بطرس الثانية", "bbnt7", 3], ["يوحنا الأولى", "bbnt7", 5], ["يوحنا الثانية", "bbnt7", 1], ["يوحنا الثالثة", "bbnt7", 1], ["يهوذا", "bbnt7", 1], ["الرؤيا", "bbnt8", 22], ["التكوين", "bbot1", 50], ["الخروج", "bbot2", 40], ["اللاويين", "bbot3", 27], ["العدد", "bbot4", 36], ["التثنية", "bbot5", 34], ["يشوع", "bbot6", 24], ["القضاة", "bbot6", 16], ["راعوث", "bbot6", 4], ["صموئيل الأول", "bbot7", 31], ["صموئيل الثاني", "bbot8", 24], ["الملوك الأول", "bbot9", 22], ["الملوك الثاني", "bbot10", 25], ["الأيام الأول", "bbot11", 29], ["الأيام الثاني", "bbot12", 35], ["عزرا", "bbot12", 10], ["نحميا", "bbot13", 13], ["أستير", "bbot13", 10], ["أيوب", "bbot13", 42], ["المزامير", "bbot14", 149], ["الأمثال", "bbot15", 31], ["الجامعة", "bbot15", 12], ["نشيد الأنشاد", "bbot15", 8], ["إشعياء", "bbot16", 66], ["إرميا", "bbot17", 51], ["مراثي إرميا", "bbot18", 5], ["حزقيال", "bbot19", 48], ["دانيال", "bbot20", 12], ["هوشع", "bbot20", 14], ["يوئيل", "bbot20", 3], ["عاموس", "bbot20", 9], ["عوبديا", "bbot20", 1], ["يونان", "bbot20", 3], ["ميخا", "bbot20", 7], ["ناحوم", "bbot20", 3], ["حبقوق", "bbot20", 3], ["صفنيا", "bbot20", 3], ["حجي", "bbot20", 2], ["زكريا", "bbot21", 14], ["ملاخي", "bbot21", 4]],MAP={};IDX.forEach(function(x){MAP[x[0]]=x});
+var NTSTART=39;
+var P={},B={t:0,book:null,ch:null,q:'',fs:22};
+function load(f,cb){if(P[f]===true)return cb();if(P[f]){P[f].push(cb);return}P[f]=[cb];var s=document.createElement('script');s.src=BASE+f+'.js?v=1';s.onload=function(){var q=P[f];P[f]=true;q.forEach(function(c){c()})};s.onerror=function(){P[f]=null;$('#main').innerHTML='<div class="card">تعذر تحميل السفر. اتأكد من النت وجرب تاني.</div>'};document.head.appendChild(s)}
+function norm(s){return s.replace(/االله/g,'الله').replace(/[\u064B-\u0652\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه')}
+function fx(s){return s.replace(/االله/g,'الله')}
+function AR(n){return String(n).replace(/\d/g,function(d){return '٠١٢٣٤٥٦٧٨٩'[d]})}
+var SRC='<p class="sub" style="text-align:center;margin-top:14px">المصدر: ملفات الكنيسة (نص بدون تشكيل). للاستخدام داخل الكنيسة.</p>';
+var BS='style="border:0;border-radius:12px;padding:12px 8px;font:inherit;font-size:19px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)"';
+TITLES.bib='الكتاب المقدس';
+window.vBib=function(){var m=$('#main');
+ if(B.q!==null&&B.sr){return sr()}
+ if(B.book&&B.ch){var b=MAP[B.book];m.innerHTML='<div class="card">جاري التحميل...</div>';
+  load(b[1],function(){var c=BBD[B.book][B.ch-1]||[];
+   m.innerHTML='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><button class="btn sec" onclick="bibBk()">'+B.book+'</button><b style="font-size:24px">'+B.book+' '+AR(B.ch)+'</b></div><div style="font-size:'+B.fs+'px;line-height:2.1;margin-top:10px;color:#14202e">'+c.map(function(v,i){return '<sup style="color:#b8860b;font-weight:bold;margin-left:3px">'+AR(i+1)+'</sup>'+esc(fx(v))}).join(' ')+'</div><div style="display:flex;gap:8px;margin-top:14px;justify-content:space-between"><button class="btn sec" onclick="bibN(1)" '+(B.ch>=b[2]?'disabled':'')+'>التالي</button><button class="btn sec" onclick="bibF(2)">A+</button><button class="btn sec" onclick="bibF(-2)">A-</button><button class="btn sec" onclick="bibN(-1)" '+(B.ch<=1?'disabled':'')+'>السابق</button></div>'+SRC+'</div>';$('#main').scrollTop=0});return}
+ if(B.book){var b=MAP[B.book],h='<div class="card"><button class="btn sec" onclick="bibHome()">رجوع</button> <b style="font-size:24px;margin-right:8px">'+B.book+'</b><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px">';
+  for(var i=1;i<=b[2];i++)h+='<button '+BS+' onclick="bibC('+i+')">'+AR(i)+'</button>';m.innerHTML=h+'</div></div>';return}
+ var L=IDX.filter(function(x,i){return B.t?i>=NTSTART:i<NTSTART});
+ m.innerHTML='<div style="display:flex;gap:8px;margin-bottom:10px"><button class="btn '+(B.t?'sec':'')+'" style="flex:1" onclick="B_t(0)">العهد القديم</button><button class="btn '+(B.t?'':'sec')+'" style="flex:1" onclick="B_t(1)">العهد الجديد</button></div><button class="btn block" style="margin:0 0 10px" onclick="bibS()">🔍 بحث في الكتاب</button><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+L.map(function(x){return '<button '+BS+' onclick="bibB(\''+x[0]+'\')">'+x[0]+'<br><span class="sub">'+AR(x[2])+' أصحاح</span></button>'}).join('')+'</div>'+SRC};
+window.B_t=function(t){B.t=t;vBib()};window.bibB=function(b){B.book=b;B.ch=null;vBib()};window.bibC=function(c){B.ch=c;vBib()};
+window.bibBk=function(){B.ch=null;vBib()};window.bibHome=function(){B.book=null;B.ch=null;B.sr=0;vBib()};
+window.bibN=function(d){B.ch+=d;vBib()};window.bibF=function(d){B.fs=Math.max(16,Math.min(40,B.fs+d));vBib()};
+window.bibS=function(){B.sr=1;vBib()};
+function sr(){$('#main').innerHTML='<div class="card"><button class="btn sec" onclick="bibHome()">رجوع</button><input id="bq" style="width:100%;margin-top:10px;font:inherit;font-size:20px;padding:10px;border:1px solid #ccc;border-radius:10px" placeholder="اكتب كلمة أو جزء من آية" oninput="bsq(this.value)"><div id="bst" class="sub" style="margin:8px 0"></div><div id="bl"></div></div>';$('#bq').focus();bsq('')}
+var seq=0;
+window.bsq=function(q){var my=++seq;q=norm(q.trim());var o=$('#bl');if(!q){o.innerHTML='';return}
+ var fs={};IDX.forEach(function(x){fs[x[1]]=1});var ks=Object.keys(fs),left=ks.length;$('#bst').textContent='جاري التحميل...';
+ ks.forEach(function(f){load(f,function(){if(--left)return;if(my!==seq)return;var r=[];
+  IDX.forEach(function(x){var bk=BBD[x[0]];if(!bk)return;bk.forEach(function(ch,ci){ch.forEach(function(v,vi){if(r.length<80&&norm(v).indexOf(q)>=0)r.push([x[0],ci+1,vi+1,v])})})});
+  o.innerHTML=r.map(function(x){return '<div class="card" style="box-shadow:none;border:1px solid #eee" onclick="B.sr=0;B.book=\''+x[0]+'\';B.ch='+x[1]+';vBib()"><b>'+x[0]+' '+AR(x[1])+':'+AR(x[2])+'</b><br>'+esc(fx(x[3]))+'</div>'}).join('')||'<p class="sub">مفيش نتيجة</p>';$('#bst').textContent=r.length>=80?'أول 80 نتيجة':r.length+' نتيجة'})})};
+window.B=B;
+})();

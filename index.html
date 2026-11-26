@@ -76,7 +76,7 @@ h3{margin:4px 0 10px;font-size:21px}
 <script src="hymns.js"></script>
 <script src="hymns2.js"></script>
 <script src="pp1.js"></script>
-<script src="pp2.js"></script><script src="ppfix.js"></script><script src="audio.js"></script>
+<script src="pp2.js"></script><script src="ppfix.js"></script><script src="bible-ya.js?v=1"></script><script src="audio.js"></script>
 <script>
 const KEY='youth-att.v1';
 let S;
@@ -134,16 +134,16 @@ function render(){
   if(tab==='home'){hd.innerHTML='<span class="ib"></span><div class="t">'+esc(S.title)+'</div><button class="ib" onclick="go(\'home\')">'+HOME+'</button>';}
   else{hd.innerHTML='<span class="ib"></span><div class="t">'+TITLES[tab]+'</div><button class="ib" onclick="go(\'home\')">'+HOME+'</button>';}
   $('#nav').innerHTML='';
-  ({home:vHome,hy:vHy,mb:vMb,att:vAtt,mem:vMem,fu:vFu,bd:vBd,st:vSt,adm:vAdm,asg:vAsg})[tab]();
+  ({home:vHome,hy:vHy,mb:vMb,att:vAtt,mem:vMem,fu:vFu,bd:vBd,st:vSt,adm:vAdm,asg:vAsg,bib:function(){window.vBib()}})[tab]();
 }
 function go(t){tab=t;q='';render();$('#main').scrollTop=0}
 let bi=0;
 function photos(){let a=[];try{a=JSON.parse(localStorage.getItem('youth-att.photos')||'[]')}catch(e){}return ['banner.jpg','group.jpg','church.jpg'].concat(a)}
 function newM(){go('mem');editM()}
 function vHome(){
-  const T=[['att','الحضور',1],['mem','القائمة',2],['new','مخدوم جديد',3],['fu','الافتقاد',4],['bd','أعياد الميلاد',5],['st','الإحصائيات',6],['hy','ترانيم وتماجيد',0],['mb','للمخدومين',0],['adm','نسخة احتياطية',7]];
+  const T=[['att','الحضور',1],['mem','القائمة',2],['new','مخدوم جديد',3],['fu','الافتقاد',4],['bd','أعياد الميلاد',5],['st','الإحصائيات',6],['hy','ترانيم وتماجيد',0],['mb','للمخدومين',0],['bib','الكتاب المقدس',0],['adm','نسخة احتياطية',7]];
   let ph=photos();bi=bi%ph.length;
-  $('#main').innerHTML='<img class="ban" id="ban" onclick="bi++;vHome()" src="'+ph[bi]+'" alt=""><div class="tiles">'+T.map(t=>`<button class="tile" onclick="${t[0]==='new'?'newM()':`go('${t[0]}')`}">${t[2]?`<img src="tile${t[2]}.webp" alt="">`:`<div class="emo">${t[0]==='hy'?'🎶':'📲'}</div>`}<span>${t[1]}</span></button>`).join('')+'</div>'+(S.members.length?'':'<div class="sub" style="text-align:center;padding:10px">ابدأ بإضافة الشباب من «مخدوم جديد»</div>');
+  $('#main').innerHTML='<img class="ban" id="ban" onclick="bi++;vHome()" src="'+ph[bi]+'" alt=""><div class="tiles">'+T.map(t=>`<button class="tile" onclick="${t[0]==='new'?'newM()':`go('${t[0]}')`}">${t[2]?`<img src="tile${t[2]}.webp" alt="">`:`<div class="emo">${t[0]==='hy'?'🎶':t[0]==='bib'?'📖':'📲'}</div>`}<span>${t[1]}</span></button>`).join('')+'</div>'+(S.members.length?'':'<div class="sub" style="text-align:center;padding:10px">ابدأ بإضافة الشباب من «مخدوم جديد»</div>');
 }
 
 function vAtt(){

@@ -73,6 +73,9 @@ h3{margin:4px 0 10px;font-size:21px}
 <nav id="nav"></nav>
 </div>
 <script src="hymns.js"></script>
+<script src="hymns2.js"></script>
+<script src="pp1.js"></script>
+<script src="pp2.js"></script>
 <script>
 const KEY='youth-att.v1';
 let S;
@@ -204,10 +207,15 @@ function vSt(){
 }
 
 function myH(){let a=[];try{a=JSON.parse(localStorage.getItem('youth-att.hymns')||'[]')}catch(e){}return a}
+const hyN=t=>String(t||'').replace(/[\u064B-\u0652\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
+function hyRow(x,i){return `<details class="card" data-i="${i}"><summary class="name" onclick="hyOpen(this)">${esc(x.title)}</summary><div class="hb"></div></details>`}
+function hyOpen(el){const d=el.parentNode,b=d.querySelector('.hb');if(b.dataset.f)return;b.dataset.f=1;const x=hyAll()[+d.dataset.i];b.innerHTML=`<div style="white-space:pre-wrap;line-height:1.9;margin-top:8px">${esc(x.text||'')}</div>`+(x.src?`<div class="sub" style="margin-top:6px">المصدر: ${esc(x.src)}</div>`:'')+(x.url?`<div class="sub" style="margin-top:6px"><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.src||'رابط')}</a></div>`:'')+(x.mine?`<button class="btn sec" style="margin-top:8px;padding:8px 14px" onclick="delH('${x.id}')">حذف</button>`:'')}
+function hyAll(){return window.HYMNS.concat(myH())}
+function hyList(){const q=hyN(($('#hq')||{value:''}).value.trim()),all=hyAll();
+  const sec=(k,t)=>{const a=all.map((x,i)=>[x,i]).filter(o=>o[0].cat===k&&(!q||hyN(o[0].title+' '+(o[0].text||'')).includes(q)));return `<h3 style="margin-top:14px">${t} <span class="sub">(${num(a.length)})</span></h3>`+(a.map(o=>hyRow(o[0],o[1])).join('')||'<div class="empty">'+(q?'مفيش نتائج':'لسه مفيش')+'</div>')};
+  $('#hl').innerHTML=sec('hymn','🎶 ترانيم')+sec('pp','📋 قائمة الترانيم')+sec('praise','✨ تماجيد وذكصولوجيات')}
 function vHy(){
-  const all=window.HYMNS.concat(myH());
-  const sec=(k,t)=>`<h3 style="margin-top:14px">${t}</h3>`+(all.filter(x=>x.cat===k).map(x=>`<div class="card"><div class="name">${esc(x.title)}</div>${x.text?`<div style="white-space:pre-line;line-height:1.9;margin-top:8px">${esc(x.text)}</div>`:''}${x.url?`<div class="sub" style="margin-top:6px"><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.src||'رابط')}</a></div>`:''}${x.mine?`<button class="btn sec" style="margin-top:8px;padding:8px 14px" onclick="delH('${x.id}')">حذف</button>`:''}</div>`).join('')||'<div class="empty">لسه مفيش</div>');
-  $('#main').innerHTML=sec('hymn','🎶 ترانيم')+sec('praise','✨ تماجيد وذكصولوجيات')+'<button class="btn block" onclick="addH()">+ إضافة ترنيمة أو تمجيد</button><div class="sub" style="padding:8px;text-align:center">اللي بتضيفه بيتحفظ على موبايلك بس. عشان يظهر للمخدومين ابعته للمطور يتنشر.</div>';
+  $('#main').innerHTML='<input id="hq" type="search" placeholder="ابحث باسم الترنيمة أو بكلمة منها" oninput="hyList()" style="width:100%;margin-bottom:6px"><div id="hl"></div><button class="btn block" onclick="addH()">+ إضافة ترنيمة أو تمجيد</button><div class="sub" style="padding:8px;text-align:center">اللي بتضيفه بيتحفظ على موبايلك بس. عشان يظهر للمخدومين ابعته للمطور يتنشر.</div>';hyList();
 }
 function addH(){sheet(`<h3>إضافة</h3><label>النوع</label><select id="h_k"><option value="hymn">ترنيمة</option><option value="praise">تمجيد</option></select><label>العنوان</label><input id="h_t"><label>الكلمات (اختياري)</label><textarea id="h_x" style="min-height:160px"></textarea><label>رابط صوت أو فيديو (اختياري)</label><input id="h_u" type="url"><button class="btn block" onclick="saveH()">حفظ</button><button class="btn sec block" onclick="closeSheet()">إلغاء</button>`)}
 function saveH(){const t=$('#h_t').value.trim();if(!t){toast('اكتب العنوان');return}const a=myH();a.push({id:uid(),mine:1,cat:$('#h_k').value,title:t,text:$('#h_x').value.trim(),url:$('#h_u').value.trim(),src:'رابط'});localStorage.setItem('youth-att.hymns',JSON.stringify(a));closeSheet();vHy()}

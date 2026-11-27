@@ -48,8 +48,13 @@
     if(v)v.style.opacity=ST.i<=0?.35:1;
     fit();
   }
+  function listOf(){
+    if(typeof window.hyAll==='function')return window.hyAll();
+    if(typeof window.hysList==='function')return window.hysList()||[];
+    return [];
+  }
   function open(i){
-    var list=(typeof hyAll==='function')?hyAll():[];
+    var list=listOf();
     var x=list[+i];if(!x)return;
     var sl=slidesOf(x);if(!sl.length)return;
     close();

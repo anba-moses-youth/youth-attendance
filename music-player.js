@@ -24,11 +24,13 @@
   }
   var K=0;
   function playerHTML(u,compact){
-    var y=ytId(u);
-    var box=compact?'max-width:360px;margin:8px auto 0;position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000':'margin-top:8px;position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000';
-    if(y)return '<div style="'+box+'"><iframe src="https://www.youtube-nocookie.com/embed/'+y+'?rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>';
-    var d=driveId(u);
-    if(d)return '<div style="'+box+'"><iframe src="https://drive.google.com/file/d/'+d+'/preview" allow="autoplay" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>';
+    var y=ytId(u),d=driveId(u);
+    var inner='position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000';
+    var open=compact?('<div style="max-width:360px;margin:8px auto 0"><div style="'+inner+'">'):('<div style="margin-top:8px;'+inner+'">');
+    var close=compact?'</div></div>':'</div>';
+    var ifr=function(src){return '<iframe src="'+src+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe>'};
+    if(y)return open+ifr('https://www.youtube-nocookie.com/embed/'+y+'?rel=0&playsinline=1')+close;
+    if(d)return open+ifr('https://drive.google.com/file/d/'+d+'/preview')+close;
     return '<audio controls preload="metadata" src="'+esc(u)+'" style="width:100%;margin-top:8px"></audio>';
   }
   function mount(el,x,opts){

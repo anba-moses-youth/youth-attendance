@@ -25,6 +25,7 @@ header img{width:84px;height:84px;border-radius:50%;display:block;margin:0 auto 
 .sub{font-size:15px;color:#6a7788}
 a{color:#1f3a5f}
 .big{font-size:44px;font-weight:700}
+.sld{display:block;width:100%;margin:10px 0 2px;border:0;border-radius:12px;padding:14px;background:#1c1c1c;color:#f2c230;font:inherit;font-weight:700;font-size:19px}
 .g{display:flex;gap:8px}.g>div{flex:1;background:#fff;border-radius:12px;padding:12px 4px;text-align:center;font-size:15px;color:#6a7788;box-shadow:0 1px 3px rgba(0,0,0,.1)}.g b{display:block;font-size:30px;color:#14202e}
 </style>
 </head>
@@ -35,6 +36,7 @@ a{color:#1f3a5f}
 <div class="c" id="c"></div>
 </div>
 <script src="hymns.js"></script><script src="hymns2.js"></script><script src="pp1.js"></script><script src="pp2.js"></script>
+<script src="hys1.js?v=1"></script><script src="hys2.js?v=1"></script><script src="hys3.js?v=1"></script><script src="hyslide.js?v=3"></script>
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -49,7 +51,7 @@ if(location.hash.startsWith('#c=')){
 }
 let T=card?'c':'h';
 function items(k){let a=window.HYMNS.filter(x=>k==='hymn'?(x.cat==='hymn'||x.cat==='pp'):x.cat===k);return a}
-function list(k){const a=items(k);return a.length?a.map(x=>`<div class="card"><h3>${esc(x.title)}</h3><div class="tx" style="white-space:pre-wrap">${esc(x.text)}</div>${x.url?`<div class="sub" style="margin-top:8px">المصدر: <a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.src)}</a></div>`:''}</div>`).join(''):'<div class="card sub" style="text-align:center">هتتضاف ترانيم قريب</div>'}
+function list(k){const a=items(k);return a.length?a.map((x,i)=>`<div class="card"><h3>${esc(x.title)}</h3><button class="sld" onclick="hysOpen(${i})">▶ عرض كسلايدات · ${num(ppSlides(x).length)} سلايد</button><div class="tx" style="white-space:pre-wrap">${esc(x.text)}</div>${x.url?`<div class="sub" style="margin-top:8px">المصدر: <a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.src)}</a></div>`:''}</div>`).join(''):'<div class="card sub" style="text-align:center">هتتضاف ترانيم قريب</div>'}
 function show(t){T=t;['h','p','c'].forEach(k=>$('#t_'+k).className=k===t?'on':'');
   if(t==='h')$('#c').innerHTML=list('hymn');
   else if(t==='p')$('#c').innerHTML=list('praise');
@@ -58,6 +60,7 @@ function show(t){T=t;['h','p','c'].forEach(k=>$('#t_'+k).className=k===t?'on':''
   <div class="g"><div><b>${num(card.ab)}</b>غياب</div><div><b>⭐ ${num(card.pts)}</b>نقاطك</div></div>
   <div class="sub" style="text-align:center;margin-top:12px">آخر تحديث: ${esc(card.d)}${card.ls?' · آخر حضور: '+esc(card.ls):''}<br>الكارت ده بتاعك أنت بس. لو عايز تحدثه اطلب لينك جديد من خادمك.</div>`
   :'<div class="card" style="text-align:center">الكارت بتاعك بيظهر هنا بعد ما خادمك يبعتلك لينكك الخاص (فيه حضورك ونقطك).</div>'}
+window.hysList=function(){try{return items(T)}catch(e){return []}};
 show(T);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>

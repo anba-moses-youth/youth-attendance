@@ -2,13 +2,24 @@
 (function(){
   var $=function(s){return document.querySelector(s)};
   function esc(s){return String(s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]})}
+  function chunkText(txt){
+    var parts=String(txt||'').split(/\n\s*\n/).filter(function(s){return s.trim()});
+    var out=[];
+    parts.forEach(function(p){
+      var lines=p.split('\n').map(function(l){return l.replace(/\s+$/,'')}).filter(function(l){return l.trim()});
+      if(!lines.length)return;
+      if(lines.length<=6){out.push(lines.join('\n'));return}
+      for(var k=0;k<lines.length;k+=4)out.push(lines.slice(k,k+4).join('\n'));
+    });
+    return out;
+  }
   function slidesOf(x){
     if(!x)return [];
     var d=window.HYSLIDES&&window.HYSLIDES[x.id];
     if(d&&d.length)return d.map(function(s){return Array.isArray(s)?s.join('\n'):String(s)});
     var f=window.PPFIX&&window.PPFIX[x.id];
     if(f&&f.length)return f.map(function(s){return Array.isArray(s)?s.join('\n'):String(s)});
-    return String(x.text||'').split('\n\n').filter(function(s){return s.trim()});
+    return chunkText(x.text);
   }
   window.ppSlides=slidesOf;
   var ST=null;

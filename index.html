@@ -312,7 +312,7 @@ setTimeout(()=>{const p=$('#splash');p.style.opacity=0;setTimeout(()=>p.remove()
 <script src="hys1.js?v=1"></script>
 <script src="hys2.js?v=1"></script>
 <script src="hys3.js?v=1"></script>
-<script src="hyslide.js?v=6"></script>
+<script src="hyslide.js?v=7"></script>
 <script>window.MUSIC_EDIT=true;</script>
 <script src="music.js?v=1"></script>
 <script src="music-player.js?v=3"></script><script>(function(){if(window.__upd)return;window.__upd=1;var b=document.createElement('button');b.id='updbtn';b.textContent='🔄 اضغط للتحديث';b.setAttribute('style','position:fixed;bottom:12px;left:12px;z-index:99999;background:#f4c430;color:#222;border:2px solid #b8860b;border-radius:22px;padding:8px 14px;font:bold 15px sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.3)');b.onclick=async function(){b.textContent='جاري التحديث...';try{var rs=await navigator.serviceWorker.getRegistrations();for(var r of rs)await r.unregister();var ks=await caches.keys();for(var k of ks)await caches.delete(k)}catch(e){}location.reload()};document.body.appendChild(b);if('serviceWorker' in navigator){var had=!!navigator.serviceWorker.controller;navigator.serviceWorker.getRegistration().then(function(r){r&&r.update()}).catch(function(){});navigator.serviceWorker.addEventListener('controllerchange',function(){if(had&&!window.__r){window.__r=1;location.reload()}})}})();</script></body>

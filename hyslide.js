@@ -83,7 +83,7 @@
       '<div id="hysb" style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:1vmin 2vmin">'+
         '<div id="hyst" style="font-family:Arial,\'Segoe UI\',Tahoma,sans-serif;font-weight:bold;text-align:center;white-space:pre-wrap;line-height:1.35;text-shadow:2px 2px 3px rgba(0,0,0,.32);overflow-wrap:anywhere"></div>'+
       '</div>'+
-      '<div id="hysa" style="display:none;padding:0 10px 6px;max-height:44vh;overflow:auto"></div>'+
+      '<div id="hysa" style="display:none;padding:0 10px 6px;max-height:42vh;overflow:auto"></div>'+
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 8px;background:#f4c430;flex:0 0 auto">'+
         '<button id="hyspv" style="font:bold 16px sans-serif;padding:10px 12px;border:0;border-radius:10px;background:#fff;color:#222">\u25B6 السابق</button>'+
         '<button id="hysau" style="font:bold 16px sans-serif;padding:10px 10px;border:0;border-radius:10px;background:#fff;color:#222">\uD83C\uDFB5</button>'+
@@ -107,7 +107,7 @@
       a.style.display='block';
       if(!a.dataset.m){
         a.dataset.m=1;
-        if(window.MUSICUI)MUSICUI.mount(a,x,{edit:window.MUSIC_EDIT===true,aud:window.MUSIC_EDIT===true,compact:true});
+        if(window.MUSICUI)MUSICUI.mount(a,x,{edit:false,aud:window.MUSIC_EDIT===true,compact:true});
         else if(window.AUD)AUD.mount(a,x.title);
       }
       setTimeout(fit,60);

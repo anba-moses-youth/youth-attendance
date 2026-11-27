@@ -23,11 +23,12 @@
     return m?m[1]:'';
   }
   var K=0;
-  function playerHTML(u){
+  function playerHTML(u,compact){
     var y=ytId(u);
-    if(y)return '<div style="position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000;margin-top:8px"><iframe src="https://www.youtube-nocookie.com/embed/'+y+'?rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>';
+    var box=compact?'max-width:360px;margin:8px auto 0;position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000':'margin-top:8px;position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000';
+    if(y)return '<div style="'+box+'"><iframe src="https://www.youtube-nocookie.com/embed/'+y+'?rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>';
     var d=driveId(u);
-    if(d)return '<div style="position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000;margin-top:8px"><iframe src="https://drive.google.com/file/d/'+d+'/preview" allow="autoplay" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>';
+    if(d)return '<div style="'+box+'"><iframe src="https://drive.google.com/file/d/'+d+'/preview" allow="autoplay" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>';
     return '<audio controls preload="metadata" src="'+esc(u)+'" style="width:100%;margin-top:8px"></audio>';
   }
   function mount(el,x,opts){
@@ -38,7 +39,7 @@
     var h='<div style="margin-top:10px;border-top:1px solid #eee;padding-top:8px">';
     h+='<div style="font:bold 15px sans-serif;margin-bottom:4px">\uD83C\uDFB5 موسيقى الترنيمة</div>';
     if(u){
-      h+=playerHTML(u);
+      h+=playerHTML(u,!!opts.compact);
       h+='<div style="margin-top:6px;font:13px sans-serif"><a href="'+esc(u)+'" target="_blank" rel="noopener">افتح اللينك في تاب جديد</a></div>';
     }else if(!opts.edit){
       h+='<div style="font:14px sans-serif;opacity:.75">مفيش موسيقى للترنيمة دي لسه.</div>';

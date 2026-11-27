@@ -103,9 +103,14 @@
     };
     $('#hysau').onclick=function(){
       var a=$('#hysa');if(!a)return;
-      if(a.style.display!=='none'){a.style.display='none';return}
+      if(a.style.display!=='none'){a.style.display='none';fit();return}
       a.style.display='block';
-      if(!a.dataset.m&&window.AUD){a.dataset.m=1;AUD.mount(a,x.title)}
+      if(!a.dataset.m){
+        a.dataset.m=1;
+        if(window.MUSICUI)MUSICUI.mount(a,x,{edit:window.MUSIC_EDIT===true,aud:window.MUSIC_EDIT===true});
+        else if(window.AUD)AUD.mount(a,x.title);
+      }
+      setTimeout(fit,60);
     };
     var b=$('#hysb'),tx=null,ty=null,tt=0;
     b.addEventListener('touchstart',function(e){if(e.touches.length!==1)return;tx=e.touches[0].clientX;ty=e.touches[0].clientY;tt=Date.now()},{passive:true});

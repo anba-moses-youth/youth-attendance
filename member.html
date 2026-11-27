@@ -60,7 +60,7 @@ function show(t){T=t;['h','p','c'].forEach(k=>$('#t_'+k).className=k===t?'on':''
   <div class="g"><div><b>${num(card.ab)}</b>غياب</div><div><b>⭐ ${num(card.pts)}</b>نقاطك</div></div>
   <div class="sub" style="text-align:center;margin-top:12px">آخر تحديث: ${esc(card.d)}${card.ls?' · آخر حضور: '+esc(card.ls):''}<br>الكارت ده بتاعك أنت بس. لو عايز تحدثه اطلب لينك جديد من خادمك.</div>`
   :'<div class="card" style="text-align:center">الكارت بتاعك بيظهر هنا بعد ما خادمك يبعتلك لينكك الخاص (فيه حضورك ونقطك).</div>'}
-window.hysList=function(){try{return items(T)}catch(e){return []}};
+window.hysList=function(){try{return items(T==='p'?'praise':'hymn')}catch(e){return []}};
 show(T);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>

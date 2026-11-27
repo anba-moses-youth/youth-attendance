@@ -62,7 +62,7 @@
       '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;flex:0 0 auto">'+
         '<button id="hysx" style="font:bold 16px sans-serif;padding:8px 12px;border:0;border-radius:10px;background:#f4c430;color:#222">\u2715 رجوع</button>'+
         '<div id="hyst2" style="flex:1;font:13px sans-serif;color:#888;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+esc(x.title||'')+'</div>'+
-        '<button id="hysf" style="font:bold 16px sans-serif;padding:8px 12px;border:0;border-radius:10px;background:#eee;color:#222">\u26F6</button>'+
+        '<button id="hysf" style="font:bold 13px sans-serif;padding:8px 10px;border:0;border-radius:10px;background:#eee;color:#222">شاشة كاملة</button>'+
       '</div>'+
       '<div id="hysb" style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:1vmin 2vmin">'+
         '<div id="hyst" style="font-family:Arial,\'Segoe UI\',Tahoma,sans-serif;font-weight:bold;text-align:center;white-space:pre-wrap;line-height:1.35;text-shadow:2px 2px 3px rgba(0,0,0,.32);overflow-wrap:anywhere"></div>'+
